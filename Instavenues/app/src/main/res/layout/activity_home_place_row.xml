@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:id="@+id/row"
+    android:layout_marginLeft	="@dimen/feed_item_margin_left_right"
+    android:layout_marginRight	="@dimen/feed_item_margin_left_right"
+    android:layout_marginTop	="@dimen/feed_item_margin"
+    android:layout_marginBottom	="@dimen/feed_item_margin_bottom"
+    android:background			="@drawable/bg_parent_rounded_corner"
+    >
+
+    <LinearLayout
+        android:layout_width		="fill_parent"
+        android:layout_height		="fill_parent"
+        android:orientation			="vertical"
+        android:background="?android:attr/selectableItemBackground"
+        android:paddingBottom		="@dimen/feed_item_padding_top_bottom"
+        android:paddingTop			="@dimen/feed_item_padding_top_bottom">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingRight="10dp"
+            android:paddingLeft="10dp">
+
+
+            <TextView
+                android:text="TextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/placeName" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
