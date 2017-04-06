@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Instavenues.iml" filepath="$PROJECT_DIR$/Instavenues.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/easylocator/easylocator.iml" filepath="$PROJECT_DIR$/easylocator/easylocator.iml" />
     </modules>
   </component>
 </project>

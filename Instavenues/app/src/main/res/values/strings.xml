@@ -12,4 +12,7 @@
     <string name="empty_images">No available images</string>
     <string name="ok">OK</string>
     <string name="lets_go">Let\u0027s Go</string>
+    <string name="gps_network_not_enabled">GPS network not enabled</string>
+    <string name="open_location_settings">Open location settings</string>
+    <string name="Cancel">Cancel</string>
 </resources>

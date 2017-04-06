@@ -1,9 +1,14 @@
 package com.instavenues.activity;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -24,6 +30,8 @@ import com.instavenues.app.AppController;
 import com.instavenues.helper.Connectivity;
 import com.instavenues.model.Image;
 import com.instavenues.model.Place;
+import com.pureix.easylocator.controller.service.LocationAPI;
+import com.pureix.easylocator.service.locatonService.Listener.LocationReceiverListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,6 +55,9 @@ public class HomeActivity extends AppCompatActivity {
     private PlacesAdapter    adapter;
     private RecyclerView recyclerView;
 
+    private LocationAPI locationAPI;
+    private Location currentLocation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +65,23 @@ public class HomeActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        checkLocationService();
+
+        locationAPI = new LocationAPI(HomeActivity.this);
+        locationAPI.setLocationReceiverListener(new LocationReceiverListener() {
+            @Override
+            public void getLastKnownLocation(Location location) {
+                currentLocation = location;
+                Toast.makeText(HomeActivity.this, "Location updated....", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onLocationChanged(Location location) {
+                currentLocation = location;
+                Toast.makeText(HomeActivity.this, "Location updated....", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // initialize refresh fab button
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -107,6 +135,14 @@ public class HomeActivity extends AppCompatActivity {
         pDialog.setMessage("Downloading...");
         pDialog.show();
 
+        String strLocation = null;
+        if(currentLocation == null)
+        {
+            strLocation = "-26.00425,28.11336";
+        }else
+        {
+            strLocation = currentLocation.getLatitude()+","+currentLocation.getLongitude();
+        }
         String uri = String.format(endpoint+"?"
                         +"v=%1$s"
                         +"&intent=%2$s"
@@ -121,7 +157,7 @@ public class HomeActivity extends AppCompatActivity {
                 "WOBAXKHNQZCVKGJHVYDFEU3YRB20H0PAMBHYKR4QAPCCEPZX",
                 "P11GQE0CCYCKPAP3MHFLQBP5DSLP2H15FGRMSZHMX4TECIHV",
                 //"coffee",
-                "-26.00425,28.11336"//,
+                strLocation//,
                 //"3"
         );
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.GET,
@@ -194,5 +230,84 @@ public class HomeActivity extends AppCompatActivity {
             alert.show();
         }catch (Exception e)
         {}
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        locationAPI.start();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        locationAPI.pause();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[],
+                                           int[] grantResults) {
+        locationAPI.requestPermission(HomeActivity.this);
+        locationAPI.onRequestPermissionsResult(requestCode, permissions,
+                grantResults);
+    }
+
+    private void checkLocationService() {
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
+
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception ex) {
+        }
+
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch (Exception ex) {
+        }
+
+        if (!gps_enabled && !network_enabled) {
+            // notify user
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+            dialog.setMessage(getResources().getString(R.string.gps_network_not_enabled));
+            dialog.setPositiveButton(getResources().getString(R.string.open_location_settings), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    // TODO Auto-generated method stub
+                    Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(myIntent);
+                    //get gps
+                }
+            });
+            dialog.setNegativeButton(getString(R.string.Cancel), new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    // TODO Auto-generated method stub
+
+                }
+            });
+            //dialog.show();
+
+            final AlertDialog alert = dialog.create();
+            // now setup to change color of the button
+            alert.setOnShowListener(new DialogInterface.OnShowListener() {
+                @Override
+                public void onShow(DialogInterface dialog) {
+                    alert.getButton(AlertDialog.BUTTON_POSITIVE)
+                            .setTextColor(Color.parseColor("#2a64af"));
+
+                    alert.getButton(AlertDialog.BUTTON_NEGATIVE)
+                            .setTextColor(Color.parseColor("#2a64af"));
+                }
+            });
+
+            try {
+                alert.show();
+            }catch (Exception e)
+            {}
+        }
     }
 }
